@@ -6,10 +6,11 @@ library(stringr)
 library(lubridate)
 library(leaflet)
 library(rnaturalearth)
-# library(rgdal)
-# library(sp)
-# library(maps)
-# library(maptools)
+library(ggplot2)
+library(rgdal)
+library(sp)
+library(maps)
+library(maptools)
 ### raw emissions ####
 
 raw_emissions <-
@@ -45,6 +46,18 @@ yearly_averages <- tidy_land_temp %>%
 
 glimpse(yearly_averages)
 
+poland <- filter(yearly_averages, country_name == 'Poland') %>%
+  na.omit()
+
+ggplot(poland, aes(year, yearly_average_temperature)) +
+  geom_line() +
+  geom_smooth()
+
+## data vis of temp by country over time
+
+
+
+
 ### combining the datasets ####
 
 
@@ -68,9 +81,8 @@ mymap <- leaflet() %>%
 mymap
 
 ### map 3 ####
-world <- map("world", fill = TRUE, plot = FALSE)
-world_map <-
-  map2SpatialPolygons(world, sub(":.*$", "", world$names))
+world <- maps::map("world", fill = TRUE, plot = FALSE)
+world_map <- map2SpatialPolygons(world, sub(":.*$", "", world$names))
 world_map <- SpatialPolygonsDataFrame(world_map,
                                       data.frame(country = names(world_map),
                                                  stringsAsFactors = FALSE),
@@ -98,12 +110,17 @@ leaflet(world_map) %>%
 
 ### map4 ####
 
-map <- ne_countries()
+map <- rnaturalearth::ne_countries()
+
+map$continent
+map$name
+map$abbrev
+map$name_long
+
+names(map)
+
 names(map)[names(map) == "iso_a3"] <- "country_code"
 names(map)[names(map) == "name"] <- "country_name"
-
-
-left_join(map, joined_df)
 
 
 map$year <-
