@@ -1,5 +1,5 @@
 ## load libraries 
-library(rnaturalearth)
+# library(rnaturalearth)
 library(leaflet)
 library(dplyr)
 library(readr)
@@ -15,8 +15,8 @@ final_table <- final_table %>%
          co2_emmission = parse_number(co2_emmission))
 
 # country name cleaning
-# final_table$country[final_table$country == "USA"] <- "United States"
-# final_table$country[final_table$country == "Congo"] <- "Dem. Rep. Congo"
+final_table$country[final_table$country == "USA"] <- "United States"
+final_table$country[final_table$country == "Congo"] <- "Dem. Rep. Congo"
 
 ##  data matching data
 
@@ -24,28 +24,14 @@ final_table <- final_table %>%
 map <- rnaturalearth::ne_countries()
 names(map)[names(map) == "name"] <- "country"
 
-
-
 # add consumption & emission data to polygon data
 countries <- readOGR("world-shapefiles-simple","TM_WORLD_BORDERS-0.3")
-# names(countries)
-# countries$NAME
-map <- merge(countries, final_table, by.x = "NAME", by.y = "country", duplicateGeoms=TRUE)
-# map$food_category <- final_table[match(map$country, final_table$country), "food_category"]
-# map$consumption <- final_table[match(map$country, final_table$country), "consumption"]
-# map$co2_emmission <- final_table[match(map$country, final_table$country), "co2_emmission"]
+map <- merge(countries, final_table, by.x = "NAME", by.y = "country", duplicateGeoms = TRUE)
 map2 <- map[!is.na(map@data$food_category), ]
-# world.map[world.map@data$AREA > 30000, ]
-# map2[map2@data$food_category == 'Rice', ]
-# map2[map2$food_category == 'Rice', ]
-
-
 
 ## data vis 
-
-# filtered_map <- map2[map2$food_category == 'Pork', ]
-# filter(map, food_category == 'Pork')
-filtered_map <- subset(map2, food_category == 'Eggs') 
+food <- map2$food_category[4]
+filtered_map <- subset(map2, food_category == food) 
 
 
 ## you can manioulate whether the scale is relative to the food item
@@ -59,7 +45,7 @@ pal <- colorBin(
 # create over over label
 filtered_map$labels <- paste0(
   "<strong> Country: </strong> ",
-  filtered_map$country, "<br/> ",
+  filtered_map$NAME, "<br/> ",
   "<strong> Food type consumption in kg/per capita: </strong> ",
   filtered_map$consumption, "<br/> ",
   "<strong> Co2 emissions in ton/per capita: </strong> ",
